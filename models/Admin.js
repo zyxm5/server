@@ -2,11 +2,11 @@ const sequelize = require('./db');
 const { DataTypes } = require('sequelize');
 module.exports = sequelize.define('Admin', {
     // 在这里定义模型属性
-    loginId: {
+    username: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    loginPwd: {
+    password: {
         type: DataTypes.STRING,
         // allowNull 默认为 true
         allowNull: false

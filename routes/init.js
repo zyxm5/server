@@ -15,9 +15,9 @@ app.use(cookieParser());
 app.use(require('./middlewares/token'));
 
 // 配置session中间件
-app.use(session({
-    secret: 'true'
-}))
+// app.use(session({
+//     secret: 'true'
+// }))
 
 // 配置防盗链中间件
 app.use(require('./middlewares/anti-leech'));
@@ -30,7 +30,7 @@ app.use(express.static(staticPath));
 // app.use(require('./corsMiddleware'));
 // 默认支持简单请求和预检请求
 // 白名单
-const whiteList = ['null', 'http://127.0.0.1:8000'];
+const { whiteList } = require('./config');
 app.use(cors({
     origin(origin, callback) {
         if (!origin || whiteList.includes(origin)) {

@@ -2,6 +2,7 @@ const service = require('../../services/Admin');
 const handlerHelper = require('../util/handlerHelper');
 const apiHelper = require('../util/apiHelper');
 const jwt = require('../util/jwt');
+const { tokenKey } = require('../config');
 
 const baseUrl = '/api/admin';
 const apis = [
@@ -11,10 +12,10 @@ const apis = [
         path: '/login',
         handler: handlerHelper(async (req, res) => {
             const {
-                loginId,
-                loginPwd
+                username,
+                password
             } = req.body;
-            const result = await service.login(loginId, loginPwd);
+            const result = await service.login(username, password);
             if (result) {
                 // res.header('set-cookie', `token=${result.id};max-age=3600`)
                 // 1.使用cookie的方式进行身份验证
@@ -44,8 +45,8 @@ const apis = [
         const query = req.query;
         const curPage = query.curPage || 1;
         const pageSize = query.pageSize || 50;
-        const loginId = query.loginId || '';
-        return await service.pageQuery(curPage, pageSize, loginId);
+        const username = query.username || '';
+        return await service.pageQuery(curPage, pageSize, username);
     })),
     {
         method: 'GET',
@@ -55,10 +56,21 @@ const apis = [
         }),
         needToken: true
     },
+    // 退出登录，用于处理通过cookie传递token的情况
+    {
+        method: 'GET',
+        path: '/loginout',
+        handler: handlerHelper(async (req,res) => {
+            res.cookie(tokenKey, '', {
+                maxAge: -1
+            })
+        }),
+        needToken: true
+    },
     // 查询单个
     apiHelper.getOneApi(service),
     // 新增
-    apiHelper.addApi(service),
+    apiHelper.addApi(service, undefined, undefined, false),
     // 更新
     apiHelper.updateApi(service),
     // 删除

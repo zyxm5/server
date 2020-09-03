@@ -11,7 +11,7 @@ exports.pageQueryApi = function (service, handler = handlerHelper(async req => {
     const query = req.query;
     const curPage = query.curPage || 1;
     const pageSize = query.pageSize || 50;
-    return await service.pageQuery(curPage, pageSize, loginId);
+    return await service.pageQuery(curPage, pageSize, username);
 }),  path = '', needToken = true) {
     return {
         method: 'GET',

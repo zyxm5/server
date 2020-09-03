@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 // jwt密钥
 const secret = 'kc7v5ao7';
 // token名称
-const tokenKey = 'token';
+const {tokenKey} = require('../config');
 /**
  * 颁发jwt
  */
@@ -15,7 +15,7 @@ exports.publish = function (res, maxAge = 1000, info = {}) {
     // 适配浏览器使用cookie
     res.cookie(tokenKey, token, {
         maxAge: maxAge * 1000,
-        path: '/'
+        httpOnly: true
     })
     // 适配其他终端使用header
     res.header('authorization', token);

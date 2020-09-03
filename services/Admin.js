@@ -5,8 +5,8 @@ const {
     Op
 } = require('sequelize');
 
-validate.validators.notExist = async (loginId) => {
-    const res = await exports.isExist(loginId);
+validate.validators.notExist = async (username) => {
+    const res = await exports.isExist(username);
     if (res) {
         return 'is already exist';
     } else {
@@ -14,22 +14,22 @@ validate.validators.notExist = async (loginId) => {
     }
 }
 
-exports.isExist = async function (loginId) {
+exports.isExist = async function (username) {
     return !!await model.findOne({
         where: {
-            loginId
+            username
         }
     })
 }
 const rules = {
-    loginId: {
+    username: {
         presence: {
             allowEmpty: false
         },
         type: 'string',
         // format: /^\w{5,18}$/,
     },
-    loginPwd: {
+    password: {
         presence: {
             allowEmpty: false
         },
@@ -39,11 +39,11 @@ const rules = {
     }
 }
 
-exports.login = async (loginId, loginPwd) => {
+exports.login = async (username, password) => {
     const res = await model.findOne({
         where: {
-            loginId,
-            loginPwd: md5(loginPwd)
+            username,
+            password: md5(password)
         }
     })
     if(res){
@@ -53,10 +53,10 @@ exports.login = async (loginId, loginPwd) => {
 }
 
 exports.add = async adminObj => {
-    // 校验规则中添加loginId唯一性校验
-    rules.loginId.notExist = true;
+    // 校验规则中添加username唯一性校验
+    rules.username.notExist = true;
     await validate.async(adminObj, rules);
-    adminObj.loginPwd = md5(adminObj.loginPwd);
+    adminObj.password = md5(adminObj.password);
     const res = await model.create(adminObj);
     return deletePwd(res);
 }
@@ -71,24 +71,24 @@ exports.delete = async id => {
 }
 
 exports.update = async (id, adminObj) => {
-    // 判断loginId是否改变
+    // 判断username是否改变
     // 否：不处理
-    // 是：判断修改后的loginId是否已存在
+    // 是：判断修改后的username是否已存在
     const me = await model.findByPk(id);
     const {
-        loginId
+        username
     } = adminObj;
-    if (me.loginId !== loginId) {
+    if (me.username !== username) {
         const another = await model.findOne({
             where: {
-                loginId
+                username
             }
         })
         if (another) {
-            throw new Error(`${loginId}已存在`);
+            throw new Error(`${username}已存在`);
         }
     }
-    adminObj.loginPwd = md5(adminObj.loginPwd);
+    adminObj.password = md5(adminObj.password);
     await validate.async(adminObj, rules);
     const res = await model.update(adminObj, {
         where: {
@@ -98,14 +98,14 @@ exports.update = async (id, adminObj) => {
     return deletePwd(res);
 }
 
-exports.pageQuery = async (curPage = 1, pageSize = 10, loginId = '') => {
+exports.pageQuery = async (curPage = 1, pageSize = 10, username = '') => {
     const res = await model.findAndCountAll({
         attributes: {
-            exclude: ['loginPwd', 'deletedAt']
+            exclude: ['password', 'deletedAt']
         },
         where: {
-            loginId: {
-                [Op.like]: `%${loginId}%`
+            username: {
+                [Op.like]: `%${username}%`
             }
         },
         limit: +pageSize,
@@ -126,12 +126,12 @@ exports.getModelById = async function (id) {
 }
 
 /**
- * 去掉返回结果中的loginPwd字段
+ * 去掉返回结果中的password字段
  * @param {*} model 
  */
 function deletePwd(model) {
     const result = JSON.parse(JSON.stringify(model));
-    delete result.loginPwd;
+    delete result.password;
     delete result.deletedAt;
     return result;
 }

@@ -1,4 +1,5 @@
 const url = require('url');
+const {whiteList} = require('../config');
 /**
  * 防盗链中间件
  */
@@ -10,7 +11,7 @@ module.exports = (req, res, next) => {
     } = req.headers;
     if (referer) {
         referer = url.parse(referer).host;
-        if(referer !== host){
+        if(!whiteList.includes(referer)){
             // 重写请求地址
             req.url = '/img/anti-leech.gif';
         }
